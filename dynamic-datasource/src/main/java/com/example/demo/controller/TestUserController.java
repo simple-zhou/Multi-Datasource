@@ -5,6 +5,7 @@ import com.example.demo.constants.DataSourceConstants;
 import com.example.demo.context.DynamicDataSourceContextHolder;
 import com.example.demo.entity.TestUser;
 import com.example.demo.mapper.TestUserMapper;
+import com.example.demo.service.TestUserService;
 import com.example.demo.vo.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +23,12 @@ public class TestUserController {
     @Autowired
     private TestUserMapper testUserMapper;
 
+    @Autowired
+    private TestUserService testUserService;
+
     @GetMapping("/listall")
     public Object listAll() {
-        int initSize = 2;
+       /* int initSize = 2;
         Map<String, Object> result = new HashMap<>(initSize);
         // 默认master查询
         QueryWrapper<TestUser> queryWrapper = new QueryWrapper<>();
@@ -39,6 +43,17 @@ public class TestUserController {
         DynamicDataSourceContextHolder.removeContextKey();
         // 返回数据
 
+        return ResponseResult.success(result);*/
+
+        int initSize = 2;
+        Map<String, Object> result = new HashMap<>();
+        // 默认master数据源查询
+        List<TestUser> masterUser = testUserService.getMasterUser();
+        // 从slave数据源查询
+        List<TestUser> slaveUser = testUserService.getSlaveUser();
+
+        result.put(DataSourceConstants.DS_KEY_MASTER,masterUser);
+        result.put(DataSourceConstants.DS_KEY_SLAVE,slaveUser);
         return ResponseResult.success(result);
     }
 }

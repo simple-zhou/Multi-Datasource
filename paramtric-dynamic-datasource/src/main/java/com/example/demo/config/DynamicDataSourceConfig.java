@@ -15,10 +15,6 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 动态数据源配置
- * @author zsw
- */
 @Configuration
 @PropertySource("classpath:config/jdbc.properties")
 @MapperScan(basePackages = "com.example.demo.mapper")
@@ -30,7 +26,7 @@ public class DynamicDataSourceConfig {
         return DataSourceBuilder.create().build();
     }
 
-    @Bean(DataSourceConstants.DS_KEY_SLAVE)
+    @Bean(DataSourceConstants.DS_KEY_MASTER)
     @ConfigurationProperties(prefix = "spring.datasource.slave")
     public DataSource slaveDataSource() {
         return DataSourceBuilder.create().build();
@@ -39,16 +35,11 @@ public class DynamicDataSourceConfig {
     @Bean
     @Primary
     public DataSource dynamicDataSource() {
-        Map<Object,Object> datasourceMap = new HashMap<>(8);
-        datasourceMap.put(DataSourceConstants.DS_KEY_MASTER,masterDataSource());
-        datasourceMap.put(DataSourceConstants.DS_KEY_SLAVE,slaveDataSource());
-        // 设置动态数据源
-        DynamicDataSource dynamicDataSource = new DynamicDataSource();
-        dynamicDataSource.setTargetDataSources(datasourceMap);
-        dynamicDataSource.setDefaultTargetDataSource(masterDataSource());
-        return dynamicDataSource;
+        Map<Object, Object> datasourceMap = new HashMap<>(2);
+        datasourceMap.put(DataSourceConstants.DS_KEY_MASTER, masterDataSource());
+        datasourceMap.put(DataSourceConstants.DS_KEY_SLAVE, slaveDataSource());
+        return new DynamicDataSource(masterDataSource(), datasourceMap);
     }
-
 
 
 }
